@@ -13,7 +13,7 @@ namespace Infrastructure.Extentions
 {
     public static class DepencyInjection
     {
-        public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IAppDbContext, AppDbContext>();
             services.AddDbContext<AppDbContext>(options =>
@@ -21,6 +21,8 @@ namespace Infrastructure.Extentions
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
                     o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
             });
+
+            return services;
         }
     }
 }

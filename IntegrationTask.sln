@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35825.156 d17.13
+VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -29,10 +29,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{71924CA4-7423-418F-BDC6-954A173E4E7C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{AE2BDC88-D1CD-68A9-724B-0BB2BF755B0E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTask.AppHost", "IntegrationTask.AppHost\IntegrationTask.AppHost.csproj", "{6F15BCFF-34AE-4276-810D-032125190F0B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTask.ServiceDefaults", "IntegrationTask.ServiceDefaults\IntegrationTask.ServiceDefaults.csproj", "{64DE00AF-DA3B-232A-9D47-461D44692B90}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{83A4B964-F68F-4FA0-A3ED-460A9A3E62E9}"
 EndProject
@@ -64,14 +60,6 @@ Global
 		{AE2BDC88-D1CD-68A9-724B-0BB2BF755B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE2BDC88-D1CD-68A9-724B-0BB2BF755B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE2BDC88-D1CD-68A9-724B-0BB2BF755B0E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F15BCFF-34AE-4276-810D-032125190F0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F15BCFF-34AE-4276-810D-032125190F0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F15BCFF-34AE-4276-810D-032125190F0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F15BCFF-34AE-4276-810D-032125190F0B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{64DE00AF-DA3B-232A-9D47-461D44692B90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64DE00AF-DA3B-232A-9D47-461D44692B90}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64DE00AF-DA3B-232A-9D47-461D44692B90}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64DE00AF-DA3B-232A-9D47-461D44692B90}.Release|Any CPU.Build.0 = Release|Any CPU
 		{72217310-DD87-4ECB-B97F-D24ECCE46C33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{72217310-DD87-4ECB-B97F-D24ECCE46C33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72217310-DD87-4ECB-B97F-D24ECCE46C33}.Release|Any CPU.ActiveCfg = Release|Any CPU

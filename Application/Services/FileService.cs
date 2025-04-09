@@ -1,7 +1,9 @@
 ﻿using Application.Common.Interfaces;
+using AutoMapper;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Domain.Commons;
+using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -13,51 +15,43 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class FileService : IFileService
+    public class FileService(IMapper mapper) : IFileService
     {
-        public async Task<List<T>> ReadCsvFileAsync<T>(IFormFile file) where T : AudiTable
+        private readonly IMapper _mapper = mapper;
+        public async Task<List<TEntity>> ReadCsvFileAsync<TEntity, TCsvModel, TMap>(IFormFile file)
+            where TEntity : AudiTable
+            where TCsvModel : class
+            where TMap : ClassMap<TCsvModel>
         {
-            var records = new List<T>();
+            var records = new List<TEntity>();
 
             if (file.Length > 0)
             {
-                using var stream = file.OpenReadStream(); // Open the file stream for the uploaded file
+                using var stream = file.OpenReadStream();
                 using var reader = new StreamReader(stream);
-                using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+
+                var config = new CsvConfiguration(CultureInfo.InvariantCulture)
                 {
-                    HasHeaderRecord = true // Assuming the first row is the header
-                });
-                // Read the CSV records asynchronously
-                await foreach (var record in csv.GetRecordsAsync<T>())
+                    HasHeaderRecord = true,
+                    HeaderValidated = null,
+                    MissingFieldFound = null
+                };
+
+                using var csv = new CsvReader(reader, config);
+
+                // Register the class map
+                csv.Context.RegisterClassMap<TMap>();
+
+                // Read as TCsvModel and map to TEntity
+                var csvRecords = csv.GetRecordsAsync<TCsvModel>();
+
+                await foreach (var record in csvRecords)
                 {
-                    records.Add(record);
+                    records.Add(_mapper.Map<TEntity>(record));
                 }
-                
             }
 
             return records;
-        }
-
-        public T? MapCsvRowToObject<T>(string[] csvRow) where T : AudiTable
-        {
-            if (csvRow == null || csvRow.Length == 0)
-                return null;
-
-            var obj = Activator.CreateInstance<T>();
-
-            var properties = typeof(T).GetProperties();
-            for (int i = 0; i < csvRow.Length && i < properties.Length; i++)
-            {
-                var property = properties[i];
-                if (property.CanWrite)
-                {
-                    var value = csvRow[i];
-                    var convertedValue = Convert.ChangeType(value, property.PropertyType);
-                    property.SetValue(obj, convertedValue);
-                }
-            }
-
-            return obj;
         }
     }
 }

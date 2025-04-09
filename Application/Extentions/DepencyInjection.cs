@@ -12,22 +12,18 @@ namespace Application.Extentions
 {
     public static class DepencyInjection
     {
-        public static void AddApplicationServices(this IServiceCollection services)
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddMediatR(cfg =>
             {
                 cfg.RegisterServicesFromAssembly(typeof(DepencyInjection).Assembly);
             });
 
+            services.AddAutoMapper(typeof(DepencyInjection).Assembly);
+
             services.AddScoped<IFileService, FileService>();
 
-            var mappingconfig = new MapperConfiguration(x =>
-            {
-                x.AddProfile(new MappingProfile());
-            });
-
-            IMapper mapper = mappingconfig.CreateMapper();
-            services.AddSingleton(mapper);
+            return services;
         }
     }
 }

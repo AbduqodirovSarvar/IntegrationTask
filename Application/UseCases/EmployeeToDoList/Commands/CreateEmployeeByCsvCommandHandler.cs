@@ -1,5 +1,7 @@
 ﻿using Application.Common.Interfaces;
+using Application.Models.CsvModels;
 using Application.Models.EmployeeModels;
+using Application.Services;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
@@ -23,7 +25,7 @@ namespace Application.UseCases.EmployeeToDoList.Commands
 
         public async Task<List<EmployeeViewModel>> Handle(CreateEmployeeByCsvCommand request, CancellationToken cancellationToken)
         {
-            List<Employee> employeeList = await _fileService.ReadCsvFileAsync<Employee>(request.CsvFile);
+            List<Employee> employeeList = await _fileService.ReadCsvFileAsync<Employee, EmployeeCsvModel, CsvEmployeeMap>(request.CsvFile);
 
             await _dbContext.Employees.AddRangeAsync(employeeList, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
