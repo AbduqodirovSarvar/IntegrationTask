@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Application.Models.EmployeeModels;
 using Application.UseCases.EmployeeToDoList.Commands;
 using Application.UseCases.EmployeeToDoList.Queries;
+using Domain.Configurations;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Web.Models;
@@ -18,9 +19,18 @@ public class HomeController(
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var employeeModels = await _mediator.Send(new GetAllEmployeeQuery());
+        var result = await _mediator.Send(
+                                            new GetAllEmployeeQuery()
+                                                {
+                                                    Filter = new Filter(),
+                                                    PaginationParams = new PaginationParams()
+                                                    {
+                                                        PageIndex = 0,
+                                                        PageSize = 10
+                                                    }
+                                                });
 
-        _employeePageModel.Employees = employeeModels;
+        _employeePageModel.Employees = result?.Data;
 
         return View(_employeePageModel);
     }
@@ -74,9 +84,9 @@ public class HomeController(
     {
         var result = await _mediator.Send(query);
 
-        var totalPages = (int)Math.Ceiling((double)result.Count / query.PaginationParams.PageSize);
+        ViewData["TotalPages"] = result.TotalCount;
+        ViewData["CurrentPage"] = query.PaginationParams.PageIndex;
 
-        ViewData["TotalPages"] = totalPages;
         return PartialView("_EmployeeList", result);
     }
 

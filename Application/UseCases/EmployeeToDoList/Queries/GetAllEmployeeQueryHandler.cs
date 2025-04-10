@@ -16,12 +16,12 @@
                     public class GetAllEmployeeQueryHandler(
                         IAppDbContext appDbContext,
                         IMapper mapper
-                        ) : IRequestHandler<GetAllEmployeeQuery, List<EmployeeViewModel>>
+                        ) : IRequestHandler<GetAllEmployeeQuery, ResponseViewModel<List<EmployeeViewModel>>>
                     {
                         private readonly IAppDbContext _dbContext = appDbContext;
                         private readonly IMapper _mapper = mapper;
 
-                        async Task<List<EmployeeViewModel>> IRequestHandler<GetAllEmployeeQuery, List<EmployeeViewModel>>.Handle(GetAllEmployeeQuery request, CancellationToken cancellationToken)
+                        async Task<ResponseViewModel<List<EmployeeViewModel>>> IRequestHandler<GetAllEmployeeQuery, ResponseViewModel<List<EmployeeViewModel>>>.Handle(GetAllEmployeeQuery request, CancellationToken cancellationToken)
                         {
                             IQueryable<Employee> query = _dbContext.Employees.AsQueryable();
 
@@ -35,10 +35,19 @@
 
                             query = ApplySorting(query, request.Filter?.Ascending ?? false);
 
+                            int Count = query.Count();
+
                             query = ApplyPagination(query, request.PaginationParams);
 
                             var employees = await query.ToListAsync(cancellationToken);
-                            return _mapper.Map<List<EmployeeViewModel>>(employees);
+                            var mappedEmployee = _mapper.Map<List<EmployeeViewModel>>(employees);
+                            return new ResponseViewModel<List<EmployeeViewModel>>
+                            {
+                                Data = mappedEmployee,
+                                TotalCount = Count,
+                                PageIndex = request.PaginationParams?.PageIndex ?? 0,
+                                PageSize = request.PaginationParams?.PageSize ?? 20
+                            };
                         }
 
                         private IQueryable<Employee> ApplyPagination(IQueryable<Employee> query, PaginationParams paginationParams)

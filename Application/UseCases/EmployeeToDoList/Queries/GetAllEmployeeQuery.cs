@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Application.UseCases.EmployeeToDoList.Queries
 {
-    public class GetAllEmployeeQuery : IRequest<List<EmployeeViewModel>>
+    public class GetAllEmployeeQuery : IRequest<ResponseViewModel<List<EmployeeViewModel>>>
     {
         public Filter Filter { get; set; } = new Filter();
         public PaginationParams PaginationParams { get; set; } = new PaginationParams();
