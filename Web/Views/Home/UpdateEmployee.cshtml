@@ -1,0 +1,31 @@
+﻿@using Application.UseCases.EmployeeToDoList.Commands
+@{
+    ViewData["Title"] = "Update Employee";
+}
+
+@model UpdateEmployeeCommand
+
+<div class="container">
+    <h1 class="display-4 text-center">Update Employee</h1>
+    <p class="text-center">You can update employee with identifier: @Model.Id</p>
+    <form asp-controller="Home" asp-action="ClickUpdateEmployee" method="post">
+        <div class="row">
+            @foreach (var prop in typeof(UpdateEmployeeCommand).GetProperties())
+            {
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">@prop.Name</label>
+                    <input type="text"
+                           class="form-control"
+                           name="@prop.Name"
+                           value="@prop.GetValue(Model)"
+                    @(prop.Name == "Id" ? "disabled" : "") />
+                </div>
+            }
+        </div>
+
+        <div class="text-end mt-4">
+            <button class="btn btn-secondary me-2" type="button" onclick="location.href='@Url.Action("Index", "Home")'">Cancel</button>
+            <button class="btn btn-primary" type="submit">Save</button>
+        </div>
+    </form>
+</div>

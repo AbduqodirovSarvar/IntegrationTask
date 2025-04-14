@@ -12,14 +12,10 @@ namespace Application.Services
     {
         public MappingProfile()
         {
-            CreateMap<Employee, EmployeeViewModel>()
-                .ForMember(dest => dest.PayrollNumber, opt => opt.MapFrom(src => src.Payroll_Number))
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Forenames + " " + src.Surname))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.EMail_Home))
-                .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.Date_of_Birth))
-                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.Start_Date));
-
+            CreateMap<Employee, EmployeeViewModel>().ReverseMap();
             CreateMap<CreateEmployeeCommand, Employee>().ReverseMap();
+            CreateMap<UpdateEmployeeCommand, Employee>().ReverseMap();
+            CreateMap<EmployeeViewModel, UpdateEmployeeCommand>().ReverseMap();
 
             CreateMap<EmployeeCsvModel, Employee>()
                 .ForMember(dest => dest.Date_of_Birth, opt => opt.MapFrom(src => ParseDate(src.Date_of_Birth)))

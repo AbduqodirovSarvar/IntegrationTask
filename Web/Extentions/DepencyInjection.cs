@@ -1,6 +1,7 @@
 ﻿
 using Application.Extentions;
 using Infrastructure.Extentions;
+using Web.Services;
 
 namespace Web.Extentions
 {
@@ -10,6 +11,7 @@ namespace Web.Extentions
         {
             services.AddApplicationServices();
             services.AddInfrastructureServices(configuration);
+            services.AddSingleton<SingleModalHelper>();
             services.AddSwagger();
 
             services.AddControllers()

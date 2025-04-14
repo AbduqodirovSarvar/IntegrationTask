@@ -6,7 +6,7 @@ namespace Application.Models.EmployeeModels
     {
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
         public string? Message { get; set; } = null;
-        public string? Error { get; set; } = null;
+        public Exception? Error { get; set; } = null;
         public T? Data { get; set; }
 
         public int? TotalCount { get; set; }

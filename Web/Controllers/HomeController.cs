@@ -1,93 +1,100 @@
 using System.Diagnostics;
-using System.Threading.Tasks;
-using Application.Models.EmployeeModels;
 using Application.UseCases.EmployeeToDoList.Commands;
 using Application.UseCases.EmployeeToDoList.Queries;
+using AutoMapper;
 using Domain.Configurations;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Web.Models;
+using Web.Services;
 
 namespace Web.Controllers;
 
 public class HomeController(
-    IMediator mediator) : Controller
+    IMediator mediator,
+    IMapper mapper,
+    SingleModalHelper singleModalHelper
+    ) : Controller
 {
     private readonly IMediator _mediator = mediator;
-    private EmployeePageModel _employeePageModel = new();
+    private readonly IMapper _mapper = mapper;
+    private EmployeePageModel _employeePageModel = singleModalHelper.Model;
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int pageIndex = 0, int pageSize = 10)
     {
-        var result = await _mediator.Send(
-                                            new GetAllEmployeeQuery()
+        ViewData["CurrentPage"] = pageIndex + 1;
+        ViewData["PageSize"] = pageSize;
+        var result = await _mediator.Send(new GetAllEmployeeQuery()
                                                 {
-                                                    Filter = new Filter(),
-                                                    PaginationParams = new PaginationParams()
-                                                    {
-                                                        PageIndex = 0,
-                                                        PageSize = 10
-                                                    }
-                                                });
+            PaginationParams = new PaginationParams
+            {
+                PageIndex = pageIndex,
+                PageSize = pageSize
+            },
+            Filter = new Filter
+            {
+                SearchingText = null,
+                Ascending = false
+            }
+        });
 
-        _employeePageModel.Employees = result?.Data;
+        if (result?.Data != null)
+        {
+            _employeePageModel.Employees = result.Data;
+            ViewData["TotalPages"] = result.TotalCount;
+            ViewData["CurrentPage"] = result.PageIndex;
+            ViewData["PageSize"] = result.PageSize;
+        }
 
         return View(_employeePageModel);
     }
 
-    [HttpPost("employee/create")]
     public async Task<IActionResult> CreateEmployee(CreateEmployeeCommand command)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _mediator.Send(command);
-        return PartialView("_NewEmployee", result);
+        await _mediator.Send(command);
+        return RedirectToAction("Index");
     }
 
-    [HttpPost("employee/create/csv")]
     public async Task<IActionResult> CreateEmployeeByCsv(CreateEmployeeByCsvCommand command)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _mediator.Send(command);
-        return PartialView("_NewEmployee", result);
+        await _mediator.Send(command);
+        return RedirectToAction("Index");
     }
 
-    [HttpPost("employee/update")]
-    public async Task<IActionResult> UpdateEmployee(UpdateEmployeeCommand command)
+    public async Task<IActionResult> UpdateEmployee(Guid id)
+    {
+        var result = await _mediator.Send(new GetEmployeeQuery { Id = id });
+
+        if (result == null)
+            return NotFound();
+
+        var updateModel = _mapper.Map<UpdateEmployeeCommand>(result);
+        _employeePageModel.UpdateEmployeeCommand = updateModel;
+
+        return View(updateModel);
+    }
+
+    public async Task<IActionResult> ClickUpdateEmployee(UpdateEmployeeCommand command)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         var result = await _mediator.Send(command);
-        return PartialView("_UpdatedEmployee", result);
+        _employeePageModel.UpdateEmployeeCommand = new UpdateEmployeeCommand();
+        return RedirectToAction("Index");
     }
 
-    [HttpPost("employee/delete/{id}")]
     public async Task<IActionResult> DeleteEmployee(Guid id)
     {
-        var result = await _mediator.Send(new DeleteEmployeeCommand { Id = id });
-        return PartialView("_DeleteEmployee", result);
-    }
-
-    [HttpGet("employee/{id}")]
-    public async Task<IActionResult> GetById(Guid id)
-    {
-        var result = await _mediator.Send(new GetEmployeeQuery { Id = id });
-        return PartialView("_Employee", result);
-    }
-
-    [HttpGet("employee-list")]
-    public async Task<IActionResult> GetEmployees([FromQuery] GetAllEmployeeQuery query)
-    {
-        var result = await _mediator.Send(query);
-
-        ViewData["TotalPages"] = result.TotalCount;
-        ViewData["CurrentPage"] = query.PaginationParams.PageIndex;
-
-        return PartialView("_EmployeeList", result);
+        await _mediator.Send(new DeleteEmployeeCommand { Id = id });
+        return RedirectToAction("Index");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

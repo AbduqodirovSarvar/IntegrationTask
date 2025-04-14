@@ -1,16 +1,14 @@
 ﻿using Application.UseCases.EmployeeToDoList.Commands;
 using Application.UseCases.EmployeeToDoList.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using Web.Models;
 
 namespace Web.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    public class HomeApiController(
-        IMediator mediator) : ControllerBase
+    [ApiController]
+    public class EmployeeApiController(IMediator mediator) : ControllerBase
     {
         private readonly IMediator _mediator = mediator;
 
