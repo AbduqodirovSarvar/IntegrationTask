@@ -3,15 +3,8 @@ using AutoMapper;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Domain.Commons;
-using Domain.Entities;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Formats.Asn1;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -39,15 +32,22 @@ namespace Application.Services
 
                 using var csv = new CsvReader(reader, config);
 
-                // Register the class map
-                csv.Context.RegisterClassMap<TMap>();
-
-                // Read as TCsvModel and map to TEntity
-                var csvRecords = csv.GetRecordsAsync<TCsvModel>();
-
-                await foreach (var record in csvRecords)
+                try
                 {
-                    records.Add(_mapper.Map<TEntity>(record));
+                    // Register the class map
+                    csv.Context.RegisterClassMap<TMap>();
+
+                    // Read as TCsvModel and map to TEntity
+                    var csvRecords = csv.GetRecordsAsync<TCsvModel>();
+
+                    await foreach (var record in csvRecords)
+                    {
+                        records.Add(_mapper.Map<TEntity>(record));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error while reading csv file", ex);
                 }
             }
 

@@ -1,7 +1,6 @@
 ﻿using Application.UseCases.EmployeeToDoList.Commands;
 using Application.UseCases.EmployeeToDoList.Queries;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers

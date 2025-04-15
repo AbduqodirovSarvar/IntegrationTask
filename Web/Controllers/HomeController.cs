@@ -1,10 +1,10 @@
-using System.Diagnostics;
 using Application.UseCases.EmployeeToDoList.Commands;
 using Application.UseCases.EmployeeToDoList.Queries;
 using AutoMapper;
 using Domain.Configurations;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using Web.Models;
 using Web.Services;
 
@@ -18,15 +18,17 @@ public class HomeController(
 {
     private readonly IMediator _mediator = mediator;
     private readonly IMapper _mapper = mapper;
-    private EmployeePageModel _employeePageModel = singleModalHelper.Model;
+    private readonly EmployeePageModel _employeePageModel = singleModalHelper.Model;
 
     [HttpGet]
-    public async Task<IActionResult> Index(int pageIndex = 0, int pageSize = 10)
+    public async Task<IActionResult> Index(int pageIndex = 0, int pageSize = 10, string? searchingText = null, bool ascending = false)
     {
-        ViewData["CurrentPage"] = pageIndex + 1;
+        ViewData["PageIndex"] = pageIndex;
         ViewData["PageSize"] = pageSize;
+        ViewData["SearchingText"] = searchingText;
+        ViewData["Ascending"] = ascending;
         var result = await _mediator.Send(new GetAllEmployeeQuery()
-                                                {
+        {
             PaginationParams = new PaginationParams
             {
                 PageIndex = pageIndex,
@@ -34,17 +36,15 @@ public class HomeController(
             },
             Filter = new Filter
             {
-                SearchingText = null,
-                Ascending = false
+                SearchingText = searchingText,
+                Ascending = ascending
             }
         });
 
         if (result?.Data != null)
         {
             _employeePageModel.Employees = result.Data;
-            ViewData["TotalPages"] = result.TotalCount;
-            ViewData["CurrentPage"] = result.PageIndex;
-            ViewData["PageSize"] = result.PageSize;
+            ViewData["Total"] = result.TotalCount;
         }
 
         return View(_employeePageModel);
@@ -68,7 +68,7 @@ public class HomeController(
         return RedirectToAction("Index");
     }
 
-    public async Task<IActionResult> UpdateEmployee(Guid id)
+    public async Task<IActionResult> OpenUpdateEmployeePage(Guid id)
     {
         var result = await _mediator.Send(new GetEmployeeQuery { Id = id });
 
@@ -76,9 +76,7 @@ public class HomeController(
             return NotFound();
 
         var updateModel = _mapper.Map<UpdateEmployeeCommand>(result);
-        _employeePageModel.UpdateEmployeeCommand = updateModel;
-
-        return View(updateModel);
+        return View("UpdateEmployeePage", updateModel);
     }
 
     public async Task<IActionResult> ClickUpdateEmployee(UpdateEmployeeCommand command)
@@ -86,8 +84,7 @@ public class HomeController(
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _mediator.Send(command);
-        _employeePageModel.UpdateEmployeeCommand = new UpdateEmployeeCommand();
+        await _mediator.Send(command);
         return RedirectToAction("Index");
     }
 

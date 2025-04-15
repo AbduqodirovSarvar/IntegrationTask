@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Domain.Commons;
 using Microsoft.AspNetCore.Http;
 

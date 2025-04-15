@@ -12,13 +12,20 @@
         <div class="row">
             @foreach (var prop in typeof(UpdateEmployeeCommand).GetProperties())
             {
+                if (prop.Name == "Id")
+                {
+                    <input type="hidden"
+                           class="form-control"
+                           name="@prop.Name"
+                           value="@prop.GetValue(Model)" />
+                    continue;
+                }
                 <div class="col-md-6 mb-3">
                     <label class="form-label">@prop.Name</label>
                     <input type="text"
                            class="form-control"
                            name="@prop.Name"
-                           value="@prop.GetValue(Model)"
-                    @(prop.Name == "Id" ? "disabled" : "") />
+                           value="@prop.GetValue(Model)" />
                 </div>
             }
         </div>

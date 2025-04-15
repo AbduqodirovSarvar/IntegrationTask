@@ -1,9 +1,11 @@
 ﻿@using Application.UseCases.EmployeeToDoList.Commands
 @{
     ViewData["Title"] = "Employee Management";
-    var totalPages = ViewData["TotalPages"] as int? ?? 1;
-    var currentPage = ViewData["CurrentPage"] as int? ?? 0;
+    var total = ViewData["Total"] as int? ?? 1;
+    var pageIndex = ViewData["PageIndex"] as int? ?? 0;
     var pageSize = ViewData["PageSize"] as int? ?? 10;
+    var searchingText = ViewData["SearchingText"] as string ?? null;
+    var ascending = ViewData["Ascending"] as bool? ?? false;
 }
 
 @model EmployeePageModel
@@ -13,9 +15,14 @@
     <p class="text-center">Manage your employees with CRUD operations and sorting.</p>
 
     <div class="d-flex flex-wrap gap-2">
-        <div class="mb-3">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search">
-        </div>
+        <form method="get" asp-action="Index" asp-controller="Home" class="mb-3">
+            <input type="hidden" name="pageSize" value=@pageSize />
+            <input type="hidden" name="pageIndex" value=@pageIndex />
+            <div class="input-group">
+                <input type="text" name="searchingText" class="form-control" placeholder="Search..." value=@searchingText />
+                <button type="submit" class="btn btn-outline-primary">Search</button>
+            </div>
+        </form>
 
         <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createFormModal">
             + Create New
@@ -32,6 +39,22 @@
             <tr>
                 @foreach (var prop in typeof(EmployeeViewModel).GetProperties())
                 {
+                    if (prop.Name == "Surname")
+                    {
+                        <th onclick="sortTable('@prop.Name')" class="d-flex align-items-center">
+                            @prop.Name
+                            <form method="get" asp-action="Index" asp-controller="Home" class="mb-3" id="sortSurnameForm">
+                                <input type="hidden" name="pageSize" value=@pageSize />
+                                <input type="hidden" name="pageIndex" value=@pageIndex />
+                                <input type="hidden" name="searchingText" value=@searchingText />
+                                <input type="hidden" name="ascending" value="@ascending" id="ascendingInput" />
+                                <button type="submit" style="background: none; border: none;">
+                                    <i class="bi @(ascending ? "bi-arrow-up" : "bi-arrow-down")" id="sortIcon"></i>
+                                </button>
+                            </form>
+                        </th>
+                        continue;
+                    }
                     <th onclick="sortTable('@prop.Name')">@prop.Name</th>
                 }
                 <th>Actions</th>
@@ -46,7 +69,7 @@
                         <td>@prop.GetValue(employee)</td>
                     }
                     <td class="d-flex">
-                        <form method="post" asp-controller="Home" asp-action="UpdateEmployee" asp-route-id="@employee.Id" class="me-2">
+                        <form method="post" asp-controller="Home" asp-action="OpenUpdateEmployeePage" asp-route-id="@employee.Id" class="me-2">
                             <button type="submit" class="btn btn-primary mb-3">Edit</button>
                         </form>
                         <form method="post" asp-controller="Home" asp-action="DeleteEmployee" asp-route-id="@employee.Id" class="me-2" onsubmit="return confirm('Are you sure?');">
@@ -57,39 +80,42 @@
             }
         </tbody>
     </table>
-   
 
-<div class="d-flex align-items-center mt-4">
-    <nav>
-        <ul class="pagination mb-0">
-            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1, pageSize = pageSize })"> < </a>
-            </li>
-
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(i == currentPage ? "active" : "")">
-                    <a class="page-link" href="@Url.Action("Index", new { page = i, pageSize = pageSize })">@i</a>
+    <form method="get" asp-action="Index" asp-controller="Home" class="d-flex align-items-center mt-4">
+        <input type="hidden" name="searchingText" value=@searchingText />
+        <div>
+            <ul class="pagination mb-0">
+                <li class="page-item @(pageIndex == 0 ? "disabled" : "")">
+                    <button type="submit" name="pageIndex" value="@(pageIndex - 1)" class="page-link" @(pageIndex == 0 ? "disabled" : "")>&lt;</button>
                 </li>
-            }
 
-            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1, pageSize = pageSize })"> > </a>
-            </li>
-        </ul>
-    </nav>
-        <form method="get" asp-action="Index" asp-controller="Home">
+                @{
+                    int totalPages = (int)Math.Ceiling((double)total / pageSize);
+                    for (int i = 0; i < totalPages; i++)
+                    {
+                        <li class="page-item @(i == pageIndex ? "active" : "")">
+                            <button type="submit" name="pageIndex" value="@i" class="page-link">@(i + 1)</button>
+                        </li>
+                    }
+                }
+
+                <li class="page-item @(pageIndex >= totalPages - 1 ? "disabled" : "")">
+                    <button type="submit" name="pageIndex" value="@(pageIndex + 1)" class="page-link" @(pageIndex >= totalPages - 1 ? "disabled" : "")>&gt;</button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="ms-3">
             <div class="input-group">
                 <select class="form-select" id="pageSize" name="pageSize" onchange="this.form.submit()">
-                    <option value="5" pageSize="5">5</option>
-                    <option value="10" pageSize="10">10</option>
-                    @* <option value="25" @(pageSize == 25 ? "selected" : "")>25</option> *@
-                    @* <option value="50" @(pageSize == 50 ? "selected" : "")>50</option> *@
+                    <option value="5" selected="@(pageSize == 5)">5</option>
+                    <option value="10" selected="@(pageSize == 10)">10</option>
+                    <option value="15" selected="@(pageSize == 15)">15</option>
+                    <option value="20" selected="@(pageSize == 20)">20</option>
                 </select>
             </div>
-        </form>
-</div>
-
+        </div>
+    </form>
 
     @* Create new employee by csv file *@
     <div class="modal fade" id="createByCsvFormModal" tabindex="-1" aria-hidden="true">
@@ -111,7 +137,7 @@
 
                                     @if (prop.PropertyType == typeof(IFormFile))
                                     {
-                                        <input type="file" class="form-control" name="@prop.Name" />
+                                        <input type="file" class="form-control" name="@prop.Name" accept=".csv" />
                                     }
                                     else
                                     {
