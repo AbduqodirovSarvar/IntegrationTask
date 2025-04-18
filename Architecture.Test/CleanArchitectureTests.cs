@@ -12,7 +12,6 @@ namespace Architecture.Test
 {
     public class CleanArchitectureTests
     {
-        private const string DomainNamespace = "Domain";
         private const string ApplicationNamespace = "Application";
         private const string InfrastructureNamespace = "Infrastructure";
         private const string WebNamespace = "Web";

@@ -9,11 +9,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{B93D96E3-E
 	ProjectSection(SolutionItems) = preProject
 		api-documentation.md = api-documentation.md
 		architecture.md = architecture.md
-		testing-strategy.md = testing-strategy.md
+		getting-started.md = getting-started.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{4535D269-44E5-4E12-977F-E85A7935013E}"
 	ProjectSection(SolutionItems) = preProject
+		.env = .env
 		docker-compose.yml = docker-compose.yml
 		Dockerfile = Dockerfile
 	EndProjectSection
